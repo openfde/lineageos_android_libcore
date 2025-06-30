@@ -37,6 +37,8 @@ import java.nio.file.Path;
 import java.nio.file.FileSystems;
 import sun.security.action.GetPropertyAction;
 
+import sun.util.logging.PlatformLogger;
+
 // Android-added: Info about UTF-8 usage in filenames.
 /**
  * An abstract representation of file and directory pathnames.
@@ -180,6 +182,11 @@ public class File
      */
     private transient PathStatus status = null;
 
+    private static PlatformLogger getLogger() {
+        return PlatformLogger.getLogger("java.io.File");
+    }
+
+
     /**
      * Check if the file has an invalid path. Currently, the inspection of
      * a file path is very limited, and it only covers Nul character check.
@@ -282,7 +289,16 @@ public class File
         if (pathname == null) {
             throw new NullPointerException();
         }
-        this.path = fs.normalize(pathname);
+
+        // [phytium add] fix ForClass APP cant play audio
+        String newFilePath = pathname;
+        if (newFilePath.contains("PEPPlatform/pepbooks") && newFilePath.endsWith(".M")) {
+            newFilePath = pathname.replaceAll(".M", ".m");
+            getLogger().warning("replace path:" + pathname + " to "+newFilePath);
+        }
+        // [phytium end]
+
+        this.path = fs.normalize(newFilePath);
         this.prefixLength = fs.prefixLength(this.path);
     }
 
